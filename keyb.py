@@ -45,22 +45,24 @@ def create_menu(language):
         ],
         resize_keyboard=True
     )
-
     return keyb_menu
 
-question = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="Хочу добавиться в канал",
-                callback_data="add_channel"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text="Не хочу добавляться в канал",
-                callback_data="no_channel"
-            )
+# Step 7
+def create_question(language):
+    question = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=texts[language]["question_contact"]["yes"],
+                    callback_data="add_channel"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=texts[language]["question_contact"]["no"],
+                    callback_data="no_channel"
+                )
+            ]
         ]
-    ]
-)
+    )
+    return question

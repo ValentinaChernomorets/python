@@ -2,9 +2,14 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.types import Message, CallbackQuery
-from keyb import keyb, create_menu, question
+from keyb import keyb, create_menu, create_question
 from aiogram import F
 from translations import texts
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+logging.info("Bot started")
 
 # step 2
 from aiogram.filters import Command
@@ -138,25 +143,36 @@ async def show_contacts(message: Message):
     await message.answer(
         texts[language]["contacts"]
     )
+# Step 7
 # Inline question
 @dp.message(Command("question"))
 async def start(message: Message):
+    language = user_languages.get(message.from_user.id, "ru")
+    
+    # debug
+    print("USER ID:", message.from_user.id)
+    print("LANGUAGE:", language)
+    print("TEXT:", texts[language]["question_contact"]["welcome"])
+
     await message.answer(
-        "Хотите присоединиться к нашему каналу?",
-        reply_markup=question
+        texts[language]["question_contact"]["welcome"],
+        reply_markup=create_question(language)
     )
 
 @dp.callback_query(F.data == "add_channel")
 async def add_channel(callback: CallbackQuery):
+    language = user_languages.get(callback.from_user.id, "ru")
     await callback.answer()
     await callback.message.answer(
-        "Отлично! Добро пожаловать в наш канал!"
+        texts[language]["question_contact"]["add_channel"]
     )
+
 @dp.callback_query(F.data == "no_channel")
-async def no_channel(callback: CallbackQuery):
+async def no_channel(callback: CallbackQuery,):
+    language = user_languages.get(callback.from_user.id, "ru")
     await callback.answer()
     await callback.message.answer(
-        "Хорошо! Вы всегда можете присоединиться позже."
+        texts[language]["question_contact"]["no_channel"]
     )
 
 async def main():
