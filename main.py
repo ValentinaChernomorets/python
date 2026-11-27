@@ -6,6 +6,10 @@ from keyb import keyb, create_menu, create_question
 from aiogram import F
 from translations import texts
 import logging
+# Step 8
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.storage.memory import MemoryStorage
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,7 +23,7 @@ bot = Bot(
     token = '9245889231:AAH6gJBtFrWqGZEaI0ABU6RXjEnVej3W3CA',
     default = DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
-dp = Dispatcher()
+dp = Dispatcher(storage=MemoryStorage())
 
 # @dp.message()
 # async def echo(message: Message):
@@ -168,12 +172,59 @@ async def add_channel(callback: CallbackQuery):
     )
 
 @dp.callback_query(F.data == "no_channel")
-async def no_channel(callback: CallbackQuery,):
+async def no_channel(callback: CallbackQuery):
     language = user_languages.get(callback.from_user.id, "ru")
     await callback.answer()
     await callback.message.answer(
         texts[language]["question_contact"]["no_channel"]
     )
+
+# Step 8
+class Registration(StatesGroup):
+    name = State()
+    age = State()
+    date = State()
+
+@dp.message(Command("registration"))
+async def from_FSM(message:Message, state: FSMContext):
+    # Task add lounguage param. And create multilanguage.
+    # language = user_languages.get(message.from_user.id, "ru")
+    # print(language)
+    await message.answer("Hi, enter your name, please.")
+    await state.set_state(Registration.name)
+
+@dp.message(Registration.name)
+async def name_FSM(message:Message, state: FSMContext):
+    await message.answer("Thank you! Now enter your age.")
+    await state.update_data(name=message.text)
+    await state.set_state(Registration.age)
+
+@dp.message(Registration.age)
+async def name_FSM(message:Message, state: FSMContext):
+    await message.answer("Thank you! Enter please the date when you want to start.")
+    await state.update_data(age=message.text)
+    await state.set_state(Registration.date)
+
+@dp.message(Registration.date)
+async def name_FSM(message:Message, state: FSMContext):
+    await state.update_data(date=message.text)
+    data = await state.get_data()
+    print(data)
+    await message.answer("Thank you! Your request sent.")
+    await state.clear()
+
+# Examples for Class
+# class Car:
+#     def __init__(self, color, brand):
+#         self.color = color
+#         self.brand = brand
+
+#     def drive(self):
+#         print("Автомобиль едет!")
+
+# car1 = Car("Красный", "BMW")
+# car2 = Car("Синий", "Audi")
+# Examples for Class
 
 async def main():
     await dp.start_polling(bot)
